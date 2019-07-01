@@ -1,12 +1,26 @@
 const express = require('express');
 const hbs = require('hbs');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
+hbs.registerPartials(path.join(__dirname, 'views/partials'));
+app.set('view engine', 'hbs');
+
+// app.use((req, res, next) => {
+//   res.render('maintenance.hbs');
+// });
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-hbs.registerPartials(path.join(__dirname, 'views/partials'));
+app.use((req, res, next) => {
+  const now = new Date().toString();
+  const log = `${now} : ${req.method} : ${req.url}`;
+  console.log(log);
+  fs.appendFileSync('./log', `${log}\n`);
+  next();
+});
 
 hbs.registerHelper('getCurrentYear', () => {
   return new Date().getFullYear();
